@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>PowerGenie by Sunrun — Your Home, Powered by the Sun</title>
+  <title>Power Genie by Sunrun — Your Home, Powered by the Sun</title>
   <meta name="description" content="Scroll through the journey of solar energy — from the sun to your roof, battery, home, and community.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,14 +18,16 @@
       --sw-font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
   </style>
+  <link rel="stylesheet" href="experience.css">
 </head>
 <body>
-  <div id="world"></div>
+  <main id="world"></main>
+  <noscript><p>Explore solar and battery options for your home. <a href="https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie">Get your Power Genie quote</a>.</p></noscript>
 
   <script src="scrub-engine.js"></script>
   <script>
     mountScrollWorld(document.getElementById('world'), {
-      brand: { name: 'PowerGenie', href: '#top' },
+      brand: { name: 'Power Genie', href: '#top' },
       diveScroll: 1.4,
       connScroll: 0.8,
       hint: 'scroll to explore',
@@ -37,18 +39,21 @@
         {
           id: 'sun',
           label: 'The Source',
-          still: 'assets/stills/01-sun.png',
+          still: 'assets/stills/01-sun.webp',
+          stillMobile: 'assets/stills/01-sun-m.webp',
           clip: 'assets/vid/encoded/01-sun-dive.mp4',
           accent: '#FF6B00',
           eyebrow: 'Where It Begins',
-          title: 'The Sun',
-          body: 'Every second, the sun releases more energy than humanity has used in all of history. PowerGenie brings that power to your roof.',
-          tags: ['Clean Energy', 'Unlimited Source', 'Zero Emissions']
+          title: 'A brighter way to power home.',
+          body: 'Every second, the sun releases more energy than humanity has used in all of history. Power Genie brings that power to your roof.',
+          tags: ['Solar Energy', 'Battery Storage'],
+          cta: { primary: { label: 'Explore Your Solar Options', href: 'https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie' } }
         },
         {
           id: 'roof',
           label: 'Your Roof',
-          still: 'assets/stills/02-roof.png',
+          still: 'assets/stills/02-roof.webp',
+          stillMobile: 'assets/stills/02-roof-m.webp',
           clip: 'assets/vid/encoded/02-roof-dive.mp4',
           accent: '#0066CC',
           eyebrow: 'Capture The Light',
@@ -59,7 +64,8 @@
         {
           id: 'battery',
           label: 'Storage',
-          still: 'assets/stills/03-battery.png',
+          still: 'assets/stills/03-battery.webp',
+          stillMobile: 'assets/stills/03-battery-m.webp',
           clip: 'assets/vid/encoded/03-battery-dive.mp4',
           accent: '#4CAF50',
           eyebrow: 'Store & Protect',
@@ -70,7 +76,8 @@
         {
           id: 'home',
           label: 'Home',
-          still: 'assets/stills/04-home.png',
+          still: 'assets/stills/04-home.webp',
+          stillMobile: 'assets/stills/04-home-m.webp',
           clip: 'assets/vid/encoded/04-home-dive.mp4',
           accent: '#FFF8F0',
           eyebrow: 'Power Everything',
@@ -81,7 +88,8 @@
         {
           id: 'community',
           label: 'Community',
-          still: 'assets/stills/05-community.png',
+          still: 'assets/stills/05-community.webp',
+          stillMobile: 'assets/stills/05-community-m.webp',
           clip: 'assets/vid/encoded/05-community-dive.mp4',
           accent: '#4CAF50',
           eyebrow: 'Join The Movement',
@@ -92,7 +100,8 @@
         {
           id: 'cta',
           label: 'Get Started',
-          still: 'assets/stills/06-cta.png',
+          still: 'assets/stills/06-cta.webp',
+          stillMobile: 'assets/stills/06-cta-m.webp',
           clip: 'assets/vid/encoded/06-cta-dive.mp4',
           accent: '#FF6B00',
           eyebrow: 'Your Turn',

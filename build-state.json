@@ -1,6 +1,6 @@
 {
   "project": "sunrun-scroll",
-  "status": "desktop_complete",
+  "status": "visual_mobile_refresh_pending_browser_QA",
   "timestamp": "2026-10-18",
   "config": {
     "subject": "Sunrun / PowerGenie solar",
@@ -40,10 +40,8 @@
     "status": "pending"
   },
   "nextSteps": [
-    "Generate 6 mobile dives from 9:16 stills",
-    "Extract last frames from mobile dives",
-    "Generate 5 mobile connectors",
-    "Encode all videos for scrubbing",
-    "Assemble scroll-world page"
-  ]
+    "Browser QA on desktop, iOS Safari and Android Chrome before merging",
+    "Optional future native portrait video mode"
+  ],
+  "mobileExperience": "Portrait WebP document flow; no video downloads on mobile, reduced motion, or Save-Data"
 }
