@@ -71,8 +71,8 @@ function mountScrollWorld(container, config) {
   const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
   const smallMQ = window.matchMedia('(max-width: 860px)');
   const isMobile = () => coarse || smallMQ.matches;
-  // Decide once: resizing must not start downloading desktop media on a phone.
-  const readingMode = isMobile() || reduce || navigator.connection?.saveData;
+  // Keep one cinematic journey across screen sizes; honor accessibility and data-saving preferences.
+  const readingMode = reduce || navigator.connection?.saveData;
   let framePending = false;
   const SECTIONS = config.sections || [];
   const CONNECTORS = config.connectors || [];
@@ -119,7 +119,13 @@ function mountScrollWorld(container, config) {
   const topbar = el('div', 'sw-topbar');
   if (config.brand) {
     const brand = el('a', 'sw-brand'); brand.href = (config.brand.href || '#');
-    brand.appendChild(el('span', 'sw-brand__mark'));
+    if (config.brand.logo) {
+      const mark = el('img', 'sw-brand__logo'); mark.src = config.brand.logo;
+      mark.alt = ''; mark.width = 40; mark.height = 40; brand.appendChild(mark);
+    } else {
+      brand.appendChild(el('span', 'sw-brand__mark'));
+    }
+    brand.setAttribute('aria-label', (config.brand.name || 'Home') + ' — home');
     const nm = el('span', 'sw-brand__name'); nm.textContent = config.brand.name || ''; brand.appendChild(nm);
     topbar.appendChild(brand);
   }
@@ -143,7 +149,7 @@ function mountScrollWorld(container, config) {
   SEGMENTS.forEach(s => {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
     const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = s.si === 0 ? 'eager' : 'lazy';
-    const poster = (isMobile() && s.stillM) ? s.stillM : s.still;
+    const poster = (isMobile() && s.clipM && s.stillM) ? s.stillM : s.still;
     if (poster && !readingMode) img.src = poster;
     scene.appendChild(img); stage.appendChild(scene);
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
@@ -269,7 +275,9 @@ function mountScrollWorld(container, config) {
       else cop = (before || after) ? 0 : smooth(1 - Math.abs(pr - 0.5) / 0.5);
       const c = copies[i];
       c.style.opacity = cop;
-      c.style.transform = `translateY(calc(-50% + ${(0.5 - pr) * 4}vh))`;
+      c.style.transform = smallMQ.matches
+        ? `translateY(${(0.5 - pr) * 2}vh)`
+        : `translateY(calc(-50% + ${(0.5 - pr) * 4}vh))`;
       c.inert = cop <= 0.5;
       c.setAttribute('aria-hidden', String(cop <= 0.5));
       c.style.pointerEvents = cop > 0.5 ? 'auto' : 'none';
@@ -337,7 +345,7 @@ function mountScrollWorld(container, config) {
   window.addEventListener('touchstart', onFirstGesture, { once: true, passive: true });
 
   // Particles are a per-frame cost we can't afford alongside video scrubbing on a phone.
-  seedParticles(particles, readingMode);
+  seedParticles(particles, readingMode || isMobile());
   window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
   // Mobile browsers fire `resize` every time the URL bar slides in/out. Re-running
   // layout() there rebuilds the track height and yanks the scroll position, so on
