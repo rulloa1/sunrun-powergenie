@@ -1,0 +1,49 @@
+{
+  "project": "sunrun-scroll",
+  "status": "desktop_complete",
+  "timestamp": "2026-10-18",
+  "config": {
+    "subject": "Sunrun / PowerGenie solar",
+    "artDirection": "Photorealistic render",
+    "camera": "Fly-through (architecture B)",
+    "videoModel": "wan3-0",
+    "resolution": "720p",
+    "mobile": true
+  },
+  "desktopDives": [
+    "assets/vid/01-sun-dive.mp4",
+    "assets/vid/02-roof-dive.mp4",
+    "assets/vid/03-battery-dive.mp4",
+    "assets/vid/04-home-dive.mp4",
+    "assets/vid/05-community-dive.mp4",
+    "assets/vid/06-cta-dive.mp4"
+  ],
+  "desktopConnectors": [
+    "assets/vid/c01-sun-roof.mp4",
+    "assets/vid/c02-roof-battery.mp4",
+    "assets/vid/c03-battery-home.mp4",
+    "assets/vid/c04-home-community.mp4",
+    "assets/vid/c05-community-cta.mp4"
+  ],
+  "mobileStills": [
+    "assets/stills/01-sun-m.png",
+    "assets/stills/02-roof-m.png",
+    "assets/stills/03-battery-m.png",
+    "assets/stills/04-home-m.png",
+    "assets/stills/05-community-m.png",
+    "assets/stills/06-cta-m.png"
+  ],
+  "mobileDives": {
+    "status": "pending"
+  },
+  "mobileConnectors": {
+    "status": "pending"
+  },
+  "nextSteps": [
+    "Generate 6 mobile dives from 9:16 stills",
+    "Extract last frames from mobile dives",
+    "Generate 5 mobile connectors",
+    "Encode all videos for scrubbing",
+    "Assemble scroll-world page"
+  ]
+}

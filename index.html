@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PowerGenie by Sunrun — Your Home, Powered by the Sun</title>
+  <meta name="description" content="Scroll through the journey of solar energy — from the sun to your roof, battery, home, and community.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sw-bg: #E8F4FD;
+      --sw-ink: #1A1A2E;
+      --sw-ink-soft: #4A5568;
+      --sw-accent: #0066CC;
+      --sw-font-display: 'Inter', ui-rounded, system-ui, sans-serif;
+      --sw-font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="world"></div>
+
+  <script src="scrub-engine.js"></script>
+  <script>
+    mountScrollWorld(document.getElementById('world'), {
+      brand: { name: 'PowerGenie', href: '#top' },
+      diveScroll: 1.4,
+      connScroll: 0.8,
+      hint: 'scroll to explore',
+      nav: true,
+      atmosphere: true,
+      cta: { label: 'Get a Quote', href: 'https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie' },
+
+      sections: [
+        {
+          id: 'sun',
+          label: 'The Source',
+          still: 'assets/stills/01-sun.png',
+          clip: 'assets/vid/encoded/01-sun-dive.mp4',
+          accent: '#FF6B00',
+          eyebrow: 'Where It Begins',
+          title: 'The Sun',
+          body: 'Every second, the sun releases more energy than humanity has used in all of history. PowerGenie brings that power to your roof.',
+          tags: ['Clean Energy', 'Unlimited Source', 'Zero Emissions']
+        },
+        {
+          id: 'roof',
+          label: 'Your Roof',
+          still: 'assets/stills/02-roof.png',
+          clip: 'assets/vid/encoded/02-roof-dive.mp4',
+          accent: '#0066CC',
+          eyebrow: 'Capture The Light',
+          title: 'Solar Panels',
+          body: 'Sleek, modern panels transform sunlight into electricity. Professionally installed, backed by a 25-year warranty.',
+          tags: ['Premium Panels', 'Expert Install', '25-Year Warranty']
+        },
+        {
+          id: 'battery',
+          label: 'Storage',
+          still: 'assets/stills/03-battery.png',
+          clip: 'assets/vid/encoded/03-battery-dive.mp4',
+          accent: '#4CAF50',
+          eyebrow: 'Store & Protect',
+          title: 'Battery Backup',
+          body: 'Store excess energy for outages or peak hours. Keep your lights on when the grid goes dark.',
+          tags: ['Backup Power', 'Peak Savings', 'Grid Independence']
+        },
+        {
+          id: 'home',
+          label: 'Home',
+          still: 'assets/stills/04-home.png',
+          clip: 'assets/vid/encoded/04-home-dive.mp4',
+          accent: '#FFF8F0',
+          eyebrow: 'Power Everything',
+          title: 'Your Home, Powered',
+          body: 'Run your AC, charge your EV, live comfortably — all on clean energy you generate.',
+          tags: ['Lower Bills', 'EV Ready', 'Smart Home']
+        },
+        {
+          id: 'community',
+          label: 'Community',
+          still: 'assets/stills/05-community.png',
+          clip: 'assets/vid/encoded/05-community-dive.mp4',
+          accent: '#4CAF50',
+          eyebrow: 'Join The Movement',
+          title: 'Your Neighborhood',
+          body: 'Join thousands of families going solar. Build a cleaner, more resilient community together.',
+          tags: ['Local Impact', 'Growing Network', 'Cleaner Future']
+        },
+        {
+          id: 'cta',
+          label: 'Get Started',
+          still: 'assets/stills/06-cta.png',
+          clip: 'assets/vid/encoded/06-cta-dive.mp4',
+          accent: '#FF6B00',
+          eyebrow: 'Your Turn',
+          title: 'Go Solar Today',
+          body: 'See how much you can save. Get a free, customized quote in minutes.',
+          cta: {
+            primary: { label: 'Get Your Free Quote', href: 'https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie' },
+            secondary: { label: 'Learn More', href: '#sun' }
+          }
+        }
+      ],
+
+      connectors: [
+        'assets/vid/encoded/c01-sun-roof.mp4',
+        'assets/vid/encoded/c02-roof-battery.mp4',
+        'assets/vid/encoded/c03-battery-home.mp4',
+        'assets/vid/encoded/c04-home-community.mp4',
+        'assets/vid/encoded/c05-community-cta.mp4'
+      ]
+    });
+  </script>
+</body>
+</html>
