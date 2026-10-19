@@ -43,5 +43,5 @@
     "Browser QA on desktop, iOS Safari and Android Chrome before merging",
     "Optional future native portrait video mode"
   ],
-  "mobileExperience": "Portrait WebP document flow; no video downloads on mobile, reduced motion, or Save-Data"
+  "mobileExperience": "Single continuous scroll-scrubbed video journey, matching desktop with smaller responsive copy and controls. Reading mode reserved for reduced-motion or Save-Data preferences."
 }
