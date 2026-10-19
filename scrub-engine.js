@@ -59,8 +59,8 @@
      - clips encoded native-res, crf~20, -g 8, +faststart, no audio (see pipeline.md)
      - connectors' endpoints are the neighbouring dives' ACTUAL frames (see SKILL Step 5)
      - (optional) mobile variants at ~720p, -g 4 for smoother phone scrubbing
-   The engine loads each clip as a Blob (always seekable) and scrubs currentTime; it does
-   NOT depend on HTTP byte-range support.
+   The engine streams seekable clips with native media requests and scrubs currentTime.
+   Serve MP4s with HTTP byte-range support (provided by Vercel).
    ========================================================================== */
 
 function mountScrollWorld(container, config) {
@@ -199,8 +199,9 @@ function mountScrollWorld(container, config) {
   let vh = window.innerHeight, stageX = 0, totalW = 0, activeIndex = -1, ticking = false;
   let laidOutW = window.innerWidth;   // width the current layout was computed at (see onResize)
 
-  function layout() {
+  function layout(preservePosition = false) {
     if (readingMode) { read(); return; }
+    const progress = totalW ? clamp(window.scrollY / (totalW * vh)) : 0;
     vh = window.innerHeight;
     laidOutW = window.innerWidth;
     stageX = window.innerWidth > 860 ? 4 : 0;
@@ -208,6 +209,7 @@ function mountScrollWorld(container, config) {
     SEGMENTS.forEach(s => { s.start = off * vh; off += s.w; s.end = off * vh; });
     totalW = off;
     track.style.height = (totalW * vh + vh) + 'px';   // +1vh so the last flight completes
+    if (preservePosition) window.scrollTo({ top: progress * totalW * vh, behavior: 'instant' });
     read();
   }
 
@@ -256,30 +258,43 @@ function mountScrollWorld(container, config) {
     s.loading = true;
     // Serve the lighter mobile encode on phones when one was provided.
     const url = (isMobile() && s.clipM) ? s.clipM : s.clip;
-    fetch(url).then(r => r.ok ? r.blob() : Promise.reject(new Error('404')))
-      .then(blob => {
-        const v = document.createElement('video');
-        v.className = 'sw-scene__video';
-        v.muted = true; v.playsInline = true; v.preload = 'auto';
-        v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-        v.src = URL.createObjectURL(blob);
-        v.addEventListener('loadedmetadata', () => { s.ready = true; read(); wake(); });
-        // Reveal the video (hide the still poster) only once a real frame has
-        // painted — on iOS a seeked-but-never-played muted video stays blank, so
-        // hiding the still on metadata alone would flash an empty scene.
-        v.addEventListener('seeked', () => { s.el.classList.add('has-clip'); }, { once: true });
-        v.addEventListener('loadeddata', () => { try { v.pause(); } catch (e) {} if (userReady) primeVideo(v); });
-        s.el.appendChild(v); s.video = v; s.hasClip = true;
-      }).catch(() => { s.loading = false; s.failed = true; });
+    const v = document.createElement('video');
+    v.className = 'sw-scene__video';
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    // Native range requests can decode before an entire 5–15 MB clip downloads.
+    // Keep the poster visible until the decoder has an actual frame.
+    const reveal = () => {
+      if (v.readyState >= 2) s.el.classList.add('has-clip');
+    };
+    v.addEventListener('loadedmetadata', () => {
+      s.ready = Number.isFinite(v.duration) && v.duration > 0;
+      read();
+    });
+    v.addEventListener('seeked', () => { reveal(); wake(); });
+    v.addEventListener('loadeddata', () => {
+      reveal();
+      if (userReady) primeVideo(v);
+      wake();
+    });
+    v.addEventListener('error', () => {
+      s.failed = true; s.ready = false; s.hasClip = false;
+      s.el.classList.remove('has-clip');
+      v.remove();
+      read();
+    });
+    s.el.appendChild(v); s.video = v; s.hasClip = true;
+    v.src = url;
   }
 
   function read() {
-    const y = window.scrollY || window.pageYOffset;
+    const rawY = window.scrollY || window.pageYOffset || 0;
+    const y = readingMode ? rawY : clamp(rawY, 0, totalW * vh);
     if (readingMode) {
       scrollbarFill.style.transform = `scaleX(${clamp(y / Math.max(1, document.documentElement.scrollHeight - innerHeight))})`;
       ticking = false; return;
     }
-    const fade = CROSSFADE * vh;
+    const fade = Math.max(1, CROSSFADE * vh);
     let ci = 0;
     for (let i = 0; i < NSEG; i++) if (y >= SEGMENTS[i].start) ci = i;
 
@@ -288,11 +303,13 @@ function mountScrollWorld(container, config) {
       if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
       const local = clamp((y - s.start) / (s.end - s.start), 0, 1);
       s.target = s.linger ? lingerEase(local, s.linger) : local;
-      let outside = 0;
-      if (y < s.start) outside = s.start - y; else if (y > s.end) outside = y - s.end;
-      const op = smooth(1 - outside / fade);
-      s.el.style.opacity = op; s.visible = op > 0.001;
-      s.el.style.zIndex = (i === ci) ? '120' : String(100 + Math.round(op * 10));
+      // Stable stacking: dissolve the incoming scene over the outgoing one.
+      // Changing z-index at the seam caused a visible hard cut halfway through.
+      const op = i === 0 ? 1 : smooth((y - s.start + fade) / (2 * fade));
+      const inRange = y >= s.start - fade && y <= s.end + fade;
+      s.el.style.opacity = inRange ? op : 0;
+      s.visible = inRange && op > 0.001;
+      s.el.style.zIndex = String(i + 1);
       if (!s.hasClip || !s.ready) {
         const sc = reduce ? 1 : 1.03 + local * 0.14;
         s.img.style.transform = `translateX(${stageX - 2}vw) scale(${sc.toFixed(3)})`;
@@ -302,11 +319,14 @@ function mountScrollWorld(container, config) {
     for (let i = 0; i < N; i++) {
       const seg = SECTIONS[i]._seg;
       const pr = clamp((y - seg.start) / (seg.end - seg.start), 0, 1);
-      const before = y < seg.start, after = y > seg.end;
-      let cop;
-      if (i === 0) cop = after ? 0 : smooth(1 - pr / 0.62);            // greets on landing
-      else if (i === N - 1) cop = before ? 0 : smooth(pr / 0.4);       // holds CTA at the end
-      else cop = (before || after) ? 0 : smooth(1 - Math.abs(pr - 0.5) / 0.5);
+      // Hold readable copy through each dive; exchange it at the middle of
+      // the connecting flight instead of leaving nearly a viewport of dead air.
+      const previous = i > 0 ? SECTIONS[i - 1]._seg : null;
+      const next = i < N - 1 ? SECTIONS[i + 1]._seg : null;
+      const enter = previous ? (previous.end + seg.start) / 2 : 0;
+      const leave = next ? (seg.end + next.start) / 2 : Infinity;
+      const cop = (previous ? smooth((y - enter + fade) / (2 * fade)) : 1)
+        * (next ? 1 - smooth((y - leave + fade) / (2 * fade)) : 1);
       const c = copies[i];
       c.style.opacity = cop;
       c.style.transform = smallMQ.matches
@@ -344,7 +364,7 @@ function mountScrollWorld(container, config) {
       // On phones a fast flick would otherwise pile up seeks and freeze the clip;
       // cur keeps lerping, so we snap to the latest target the moment it's free.
       if (!s.visible) continue;
-      if (s.video.seeking) { moving = true; continue; }
+      if (s.video.seeking || s.video.readyState < 2) continue;
       if (Math.abs(s.cur - s.target) > 0.002) moving = true;
 
       s.cur += (s.target - s.cur) * (reduce ? 1 : 0.18);
@@ -383,11 +403,10 @@ function mountScrollWorld(container, config) {
   // width it laid out at.
   function onResize() {
     if (coarse && window.innerWidth === laidOutW) return;
-    layout();
+    layout(true);
   }
   window.addEventListener('resize', onResize);
-  window.addEventListener('orientationchange', layout);
-  window.addEventListener('load', layout);
+  // Resize fires with the final orientation dimensions; avoid an early second layout.
   container.addEventListener('click', event => {
     const link = event.target.closest('a[href^="#"]');
     if (!link) return;
@@ -458,7 +477,7 @@ function injectCSS() {
   .sw-stage{position:fixed;inset:0;z-index:10;pointer-events:none;}
   .sw-scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity;}
   .sw-scene__video,.sw-scene__still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;}
-  .sw-scene__still{will-change:transform;} .sw-scene.has-clip .sw-scene__still{opacity:0;} .sw-scene__video{z-index:1;}
+  .sw-scene__still{will-change:transform;} .sw-scene.has-clip .sw-scene__still{opacity:0;} .sw-scene__video{z-index:1;opacity:0;} .sw-scene.has-clip .sw-scene__video{opacity:1;}
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
   .sw-copylayer::before{content:"";position:absolute;inset:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
   .sw-copy{position:absolute;left:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,460px);opacity:0;will-change:opacity,transform;}
