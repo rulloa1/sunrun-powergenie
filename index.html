@@ -29,6 +29,7 @@
   <script>
     mountScrollWorld(document.getElementById('world'), {
       brand: { name: 'Sunrun', href: '#top', logo: 'assets/brand/sunrun-logo.svg' },
+      mobileClipsUseDesktopFraming: true,
       diveScroll: 1.1,
       connScroll: 0.45,
       hint: 'scroll to explore',
@@ -43,6 +44,7 @@
           still: 'assets/stills/01-sun.webp',
           stillMobile: 'assets/stills/01-sun-m.webp',
           clip: 'assets/vid/encoded/01-sun-dive.mp4',
+          clipMobile: 'assets/vid/mobile/01-sun-dive.mp4',
           accent: '#FF6B00',
           eyebrow: 'Where It Begins',
           title: 'A brighter way to power home.',
@@ -56,6 +58,7 @@
           still: 'assets/stills/02-roof.webp',
           stillMobile: 'assets/stills/02-roof-m.webp',
           clip: 'assets/vid/encoded/02-roof-dive.mp4',
+          clipMobile: 'assets/vid/mobile/02-roof-dive.mp4',
           accent: '#0066CC',
           eyebrow: 'Capture The Light',
           title: 'Solar Panels',
@@ -68,6 +71,7 @@
           still: 'assets/stills/03-battery.webp',
           stillMobile: 'assets/stills/03-battery-m.webp',
           clip: 'assets/vid/encoded/03-battery-dive.mp4',
+          clipMobile: 'assets/vid/mobile/03-battery-dive.mp4',
           accent: '#4CAF50',
           eyebrow: 'Store & Protect',
           title: 'Battery Backup',
@@ -80,6 +84,7 @@
           still: 'assets/stills/04-home.webp',
           stillMobile: 'assets/stills/04-home-m.webp',
           clip: 'assets/vid/encoded/04-home-dive.mp4',
+          clipMobile: 'assets/vid/mobile/04-home-dive.mp4',
           accent: '#FFF8F0',
           eyebrow: 'Power Everything',
           title: 'Your Home, Powered',
@@ -92,6 +97,7 @@
           still: 'assets/stills/05-community.webp',
           stillMobile: 'assets/stills/05-community-m.webp',
           clip: 'assets/vid/encoded/05-community-dive.mp4',
+          clipMobile: 'assets/vid/mobile/05-community-dive.mp4',
           accent: '#4CAF50',
           eyebrow: 'Join The Movement',
           title: 'Your Neighborhood',
@@ -104,6 +110,7 @@
           still: 'assets/stills/06-cta.webp',
           stillMobile: 'assets/stills/06-cta-m.webp',
           clip: 'assets/vid/encoded/06-cta-dive.mp4',
+          clipMobile: 'assets/vid/mobile/06-cta-dive.mp4',
           accent: '#FF6B00',
           eyebrow: 'Your Turn',
           title: 'Go Solar Today',
@@ -113,6 +120,14 @@
             secondary: { label: 'Learn More', href: '#sun' }
           }
         }
+      ],
+
+      connectorsMobile: [
+        'assets/vid/mobile/c01-sun-roof.mp4',
+        'assets/vid/mobile/c02-roof-battery.mp4',
+        'assets/vid/mobile/c03-battery-home.mp4',
+        'assets/vid/mobile/c04-home-community.mp4',
+        'assets/vid/mobile/c05-community-cta.mp4'
       ],
 
       connectors: [

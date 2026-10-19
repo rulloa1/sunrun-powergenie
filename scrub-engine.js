@@ -149,7 +149,7 @@ function mountScrollWorld(container, config) {
   SEGMENTS.forEach(s => {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
     const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = 'eager'; if (s.si !== 0) img.fetchPriority = 'low';
-    const poster = (isMobile() && s.clipM && s.stillM) ? s.stillM : s.still;
+    const poster = (isMobile() && s.clipM && s.stillM && !config.mobileClipsUseDesktopFraming) ? s.stillM : s.still;
     if (poster && !readingMode) img.src = poster;
     scene.appendChild(img); stage.appendChild(scene);
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
@@ -277,6 +277,9 @@ function mountScrollWorld(container, config) {
       if (userReady) primeVideo(v);
       wake();
     });
+    // A streamed seek can temporarily drop readyState; resume when data returns.
+    v.addEventListener('canplay', wake);
+    v.addEventListener('progress', wake);
     v.addEventListener('error', () => {
       s.failed = true; s.ready = false; s.hasClip = false;
       s.el.classList.remove('has-clip');
@@ -364,10 +367,12 @@ function mountScrollWorld(container, config) {
       // On phones a fast flick would otherwise pile up seeks and freeze the clip;
       // cur keeps lerping, so we snap to the latest target the moment it's free.
       if (!s.visible) continue;
-      if (s.video.seeking || s.video.readyState < 2) continue;
+      if (s.video.seeking || s.video.readyState < 1) continue;
       if (Math.abs(s.cur - s.target) > 0.002) moving = true;
 
-      s.cur += (s.target - s.cur) * (reduce ? 1 : 0.18);
+      // Touch flings must seek to the latest position, not decode a queue of
+      // intermediate frames while the finger has already moved to another scene.
+      s.cur += (s.target - s.cur) * (isMobile() ? 1 : 0.18);
       const dur = s.video.duration || 1;
       const t = clamp(s.cur, 0, 0.999) * dur;
       if (Math.abs(s.video.currentTime - t) > eps) { try { s.video.currentTime = t; } catch (e) {} }
@@ -382,7 +387,7 @@ function mountScrollWorld(container, config) {
   let userReady = false;
   function primeVideo(v) {
     if (!isMobile() || !v) return;
-    try { const p = v.play(); if (p && p.then) p.then(() => { try { v.pause(); } catch (e) {} }).catch(() => {}); }
+    try { const p = v.play(); if (p && p.then) p.then(() => { try { v.pause(); wake(); } catch (e) {} }).catch(wake); }
     catch (e) {}
   }
   function onFirstGesture() {
@@ -414,7 +419,8 @@ function mountScrollWorld(container, config) {
     const index = id === 'top' ? 0 : SECTIONS.findIndex(section => section.id === id);
     if (index >= 0) { event.preventDefault(); jumpTo(index); }
   });
-  document.addEventListener('visibilitychange', wake);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) read(); });
+  window.addEventListener('pageshow', read);
   layout();
   wake();
 
