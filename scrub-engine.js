@@ -238,7 +238,10 @@ function mountScrollWorld(container, config) {
   function setActive(k) {
     if (k === activeIndex) return;
     activeIndex = k;
-    dots.forEach((d, j) => { d.classList.toggle('is-active', j === k); d.toggleAttribute('aria-current', j === k); });
+    dots.forEach((d, j) => {
+      d.classList.toggle('is-active', j === k);
+      if (j === k) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
+    });
     nav.querySelectorAll('.sw-nav__item').forEach((n, j) => {
       n.classList.toggle('is-active', j === k);
       if (j === k) n.setAttribute('aria-current', 'true'); else n.removeAttribute('aria-current');
