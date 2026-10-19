@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <defs><linearGradient id="energy" x1="12" y1="6" x2="50" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE4A3"/><stop offset="1" stop-color="#F5AE47"/></linearGradient></defs>
-  <path d="M46.5 14.5A24 24 0 1 0 55 34" stroke="url(#energy)" stroke-width="4" stroke-linecap="round"/>
-  <path d="M35 12 20 35h11l-3 17 17-26H34l1-14Z" fill="url(#energy)"/>
-  <path d="m52 5 2.3 6.7L61 14l-6.7 2.3L52 23l-2.3-6.7L43 14l6.7-2.3L52 5Z" fill="#D4F1FF"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64"><defs><linearGradient id="energy" x1="12" x2="50" y1="6" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE4A3"/><stop offset="1" stop-color="#F5AE47"/></linearGradient></defs><path stroke="url(#energy)" stroke-linecap="round" stroke-width="4" d="M46.5 14.5A24 24 0 1 0 55 34"/><path fill="url(#energy)" d="M35 12 20 35h11l-3 17 17-26H34l1-14Z"/><path fill="#D4F1FF" d="m52 5 2.3 6.7L61 14l-6.7 2.3L52 23l-2.3-6.7L43 14l6.7-2.3L52 5Z"/></svg>
