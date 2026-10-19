@@ -148,7 +148,7 @@ function mountScrollWorld(container, config) {
   // segment scenes
   SEGMENTS.forEach(s => {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
-    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = s.si === 0 ? 'eager' : 'lazy';
+    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = 'eager'; if (s.si !== 0) img.fetchPriority = 'low';
     const poster = (isMobile() && s.clipM && s.stillM) ? s.stillM : s.still;
     if (poster && !readingMode) img.src = poster;
     scene.appendChild(img); stage.appendChild(scene);
@@ -179,7 +179,9 @@ function mountScrollWorld(container, config) {
     const dot = el('button', 'sw-route__dot'); dot.style.setProperty('--sw-accent', s.accent || '');
     dot.innerHTML = `<span class="sw-route__label">${esc(s.label || '')}</span><i></i>`;
     dot.setAttribute('aria-label', 'Go to ' + (s.label || s.title));
-    dot.addEventListener('click', () => jumpTo(i)); route.appendChild(dot); dots.push(dot);
+    dot.addEventListener('click', () => { dot.classList.add('is-clicked'); jumpTo(i); });
+    dot.addEventListener('pointerleave', () => dot.classList.remove('is-clicked'));
+    route.appendChild(dot); dots.push(dot);
 
     if (config.nav !== false) {
       const b = el('button', 'sw-nav__item'); b.textContent = s.label || '';
@@ -209,10 +211,42 @@ function mountScrollWorld(container, config) {
     read();
   }
 
+  // While a nav jump is smooth-scrolling, keep the highlight on the destination
+  // instead of flicking through every section it passes. Released when the scroll
+  // settles (scrollend, or a timeout where scrollend is unsupported) or the user
+  // scrolls on their own.
+  let jumpTarget = -1, jumpTimer = 0;
+  function releaseJump() { jumpTarget = -1; clearTimeout(jumpTimer); read(); }
+  if ('onscrollend' in window) window.addEventListener('scrollend', () => { if (jumpTarget >= 0) releaseJump(); });
+  ['wheel', 'touchstart', 'keydown'].forEach(ev =>
+    window.addEventListener(ev, () => { if (jumpTarget >= 0) releaseJump(); }, { passive: true }));
+
   function jumpTo(i) {
     if (readingMode) { copies[i].scrollIntoView({ behavior: reduce ? 'instant' : 'smooth' }); return; }
+    // The viewport may have changed since the last layout (e.g. a desktop window
+    // resized while hidden); recompute so we land on the right scene.
+    if (!coarse && (window.innerHeight !== vh || window.innerWidth !== laidOutW)) layout();
     const seg = SECTIONS[i]._seg;
-    window.scrollTo({ top: i === 0 ? 0 : seg.start + (seg.end - seg.start) * 0.5, behavior: reduce ? 'auto' : 'smooth' });
+    const top = i === 0 ? 0 : seg.start + (seg.end - seg.start) * 0.5;
+    // Start fetching the destination clip now rather than when we fly past it.
+    loadClip(seg);
+    setActive(i);
+    if (!reduce) { jumpTarget = i; clearTimeout(jumpTimer); jumpTimer = setTimeout(releaseJump, 1600); }
+    window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  function setActive(k) {
+    if (k === activeIndex) return;
+    activeIndex = k;
+    dots.forEach((d, j) => {
+      d.classList.toggle('is-active', j === k);
+      if (j === k) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
+    });
+    nav.querySelectorAll('.sw-nav__item').forEach((n, j) => {
+      n.classList.toggle('is-active', j === k);
+      if (j === k) n.setAttribute('aria-current', 'true'); else n.removeAttribute('aria-current');
+    });
+    container.style.setProperty('--sw-accent', SECTIONS[k].accent || '');
   }
 
   function loadClip(s) {
@@ -286,12 +320,7 @@ function mountScrollWorld(container, config) {
     const cur = SEGMENTS[ci];
     const near = clamp(cur.kind === 'dive' ? cur.si
       : (((y - cur.start) / (cur.end - cur.start)) > 0.5 ? cur.si + 1 : cur.si), 0, N - 1);
-    if (near !== activeIndex) {
-      activeIndex = near;
-      dots.forEach((d, k) => d.classList.toggle('is-active', k === near));
-      nav.querySelectorAll('.sw-nav__item').forEach((n, k) => n.classList.toggle('is-active', k === near));
-      container.style.setProperty('--sw-accent', SECTIONS[near].accent || '');
-    }
+    setActive(jumpTarget >= 0 ? jumpTarget : near);
     scrollbarFill.style.transform = `scaleX(${clamp(y / (totalW * vh))})`;
     hint.style.opacity = clamp(1 - y / (0.5 * vh));
     if (particles) particles.style.transform = `translate3d(0, ${-y * 0.05}px, 0)`;
@@ -450,7 +479,8 @@ function injectCSS() {
   .sw-route__dot:hover i{transform:scale(1.25);background:var(--sw-accent);}
   .sw-route__dot.is-active i{background:var(--sw-accent);transform:scale(1.4);box-shadow:0 0 0 5px color-mix(in srgb,var(--sw-accent) 22%,transparent);}
   .sw-route__label{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-size:.78rem;font-weight:600;color:var(--sw-ink);background:color-mix(in srgb,#fff 85%,transparent);backdrop-filter:blur(6px);padding:5px 11px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border:1px solid color-mix(in srgb,var(--sw-accent) 14%,transparent);}
-  .sw-route__dot:hover .sw-route__label,.sw-route__dot.is-active .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}
+  .sw-route__dot.is-active .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}
+  @media (hover:hover){.sw-route__dot:not(.is-clicked):hover .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}}
   .sw-hint{position:fixed;left:50%;bottom:26px;z-index:30;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sw-ink-soft);transition:opacity .3s;}
   .sw-hint i{width:22px;height:34px;border-radius:12px;border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
   .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s ease-in-out infinite;}
