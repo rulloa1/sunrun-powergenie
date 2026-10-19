@@ -71,6 +71,9 @@ function mountScrollWorld(container, config) {
   const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
   const smallMQ = window.matchMedia('(max-width: 860px)');
   const isMobile = () => coarse || smallMQ.matches;
+  // Decide once: resizing must not start downloading desktop media on a phone.
+  const readingMode = isMobile() || reduce || navigator.connection?.saveData;
+  let framePending = false;
   const SECTIONS = config.sections || [];
   const CONNECTORS = config.connectors || [];
   const CONNECTORS_M = config.connectorsMobile || [];
@@ -82,6 +85,7 @@ function mountScrollWorld(container, config) {
 
   injectCSS();
   container.classList.add('sw-root');
+  container.classList.toggle('sw-reading', !!readingMode);
 
   // ---- build the interleaved segment chain: dive0, conn0, dive1, … diveN-1 ----
   const SEGMENTS = [];
@@ -119,7 +123,7 @@ function mountScrollWorld(container, config) {
     const nm = el('span', 'sw-brand__name'); nm.textContent = config.brand.name || ''; brand.appendChild(nm);
     topbar.appendChild(brand);
   }
-  const nav = el('nav', 'sw-nav'); if (config.nav !== false) topbar.appendChild(nav);
+  const nav = el('nav', 'sw-nav'); nav.setAttribute('aria-label', 'Solar journey'); if (config.nav !== false) topbar.appendChild(nav);
   if (config.cta && config.cta.label) {
     const c = el('a', 'sw-topcta'); c.href = config.cta.href || '#'; c.textContent = config.cta.label;
     topbar.appendChild(c);
@@ -138,9 +142,9 @@ function mountScrollWorld(container, config) {
   // segment scenes
   SEGMENTS.forEach(s => {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
-    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
+    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = s.si === 0 ? 'eager' : 'lazy';
     const poster = (isMobile() && s.stillM) ? s.stillM : s.still;
-    if (poster) img.src = poster;
+    if (poster && !readingMode) img.src = poster;
     scene.appendChild(img); stage.appendChild(scene);
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
     s.loading = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
@@ -149,18 +153,26 @@ function mountScrollWorld(container, config) {
   // per-section copy / route / nav
   const copies = [], dots = [];
   SECTIONS.forEach((s, i) => {
-    const c = el('article', 'sw-copy'); c.style.setProperty('--sw-accent', s.accent || '');
+    const c = el('article', 'sw-copy'); c.id = s.id; c.setAttribute('aria-label', s.label || s.title); c.style.setProperty('--sw-accent', s.accent || '');
     c.innerHTML =
       `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` +
       (s.eyebrow ? `<span class="sw-copy__eyebrow">${esc(s.eyebrow)}</span>` : '') +
-      (s.title ? `<h2 class="sw-copy__title">${esc(s.title)}</h2>` : '') +
+      (s.title ? `<${i === 0 ? 'h1' : 'h2'} class="sw-copy__title">${esc(s.title)}</${i === 0 ? 'h1' : 'h2'}>` : '') +
       (s.body ? `<p class="sw-copy__body">${esc(s.body)}</p>` : '') +
       (s.tags && s.tags.length ? `<ul class="sw-copy__tags">${s.tags.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '') +
       (s.cta ? `<div class="sw-copy__cta">${ctaBtns(s.cta)}</div>` : '');
+    if (readingMode) {
+      const picture = el('img', 'sw-reading__image');
+      picture.src = (isMobile() && s.stillMobile) || s.still;
+      picture.alt = ''; picture.loading = i === 0 ? 'eager' : 'lazy'; picture.decoding = 'async';
+      if (i === 0) picture.fetchPriority = 'high';
+      c.prepend(picture);
+    }
     copylayer.appendChild(c); copies.push(c);
 
     const dot = el('button', 'sw-route__dot'); dot.style.setProperty('--sw-accent', s.accent || '');
     dot.innerHTML = `<span class="sw-route__label">${esc(s.label || '')}</span><i></i>`;
+    dot.setAttribute('aria-label', 'Go to ' + (s.label || s.title));
     dot.addEventListener('click', () => jumpTo(i)); route.appendChild(dot); dots.push(dot);
 
     if (config.nav !== false) {
@@ -180,6 +192,7 @@ function mountScrollWorld(container, config) {
   let laidOutW = window.innerWidth;   // width the current layout was computed at (see onResize)
 
   function layout() {
+    if (readingMode) { read(); return; }
     vh = window.innerHeight;
     laidOutW = window.innerWidth;
     stageX = window.innerWidth > 860 ? 4 : 0;
@@ -191,14 +204,15 @@ function mountScrollWorld(container, config) {
   }
 
   function jumpTo(i) {
+    if (readingMode) { copies[i].scrollIntoView({ behavior: reduce ? 'instant' : 'smooth' }); return; }
     const seg = SECTIONS[i]._seg;
-    window.scrollTo({ top: seg.start + (seg.end - seg.start) * 0.5, behavior: reduce ? 'auto' : 'smooth' });
+    window.scrollTo({ top: i === 0 ? 0 : seg.start + (seg.end - seg.start) * 0.5, behavior: reduce ? 'auto' : 'smooth' });
   }
 
   function loadClip(s) {
     // Under prefers-reduced-motion we never load the clips at all — the stills stay up
     // and simply cross-dissolve as you scroll. No scrubbed video motion, no decode cost.
-    if (reduce || s.loading || !s.clip) return;
+    if (readingMode || s.failed || s.loading || !s.clip) return;
     s.loading = true;
     // Serve the lighter mobile encode on phones when one was provided.
     const url = (isMobile() && s.clipM) ? s.clipM : s.clip;
@@ -209,18 +223,22 @@ function mountScrollWorld(container, config) {
         v.muted = true; v.playsInline = true; v.preload = 'auto';
         v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
         v.src = URL.createObjectURL(blob);
-        v.addEventListener('loadedmetadata', () => { s.ready = true; read(); });
+        v.addEventListener('loadedmetadata', () => { s.ready = true; read(); wake(); });
         // Reveal the video (hide the still poster) only once a real frame has
         // painted — on iOS a seeked-but-never-played muted video stays blank, so
         // hiding the still on metadata alone would flash an empty scene.
         v.addEventListener('seeked', () => { s.el.classList.add('has-clip'); }, { once: true });
         v.addEventListener('loadeddata', () => { try { v.pause(); } catch (e) {} if (userReady) primeVideo(v); });
         s.el.appendChild(v); s.video = v; s.hasClip = true;
-      }).catch(() => { s.loading = false; });
+      }).catch(() => { s.loading = false; s.failed = true; });
   }
 
   function read() {
     const y = window.scrollY || window.pageYOffset;
+    if (readingMode) {
+      scrollbarFill.style.transform = `scaleX(${clamp(y / Math.max(1, document.documentElement.scrollHeight - innerHeight))})`;
+      ticking = false; return;
+    }
     const fade = CROSSFADE * vh;
     let ci = 0;
     for (let i = 0; i < NSEG; i++) if (y >= SEGMENTS[i].start) ci = i;
@@ -251,7 +269,9 @@ function mountScrollWorld(container, config) {
       else cop = (before || after) ? 0 : smooth(1 - Math.abs(pr - 0.5) / 0.5);
       const c = copies[i];
       c.style.opacity = cop;
-      c.style.transform = reduce ? 'none' : `translateY(${(0.5 - pr) * 4}vh)`;
+      c.style.transform = `translateY(calc(-50% + ${(0.5 - pr) * 4}vh))`;
+      c.inert = cop <= 0.5;
+      c.setAttribute('aria-hidden', String(cop <= 0.5));
       c.style.pointerEvents = cop > 0.5 ? 'auto' : 'none';
     }
 
@@ -268,9 +288,17 @@ function mountScrollWorld(container, config) {
     hint.style.opacity = clamp(1 - y / (0.5 * vh));
     if (particles) particles.style.transform = `translate3d(0, ${-y * 0.05}px, 0)`;
     ticking = false;
+    wake();
+  }
+
+  function wake() {
+    if (!readingMode && !document.hidden && !framePending) { framePending = true; requestAnimationFrame(raf); }
   }
 
   function raf() {
+    framePending = false;
+    if (document.hidden) return;
+    let moving = false;
     const eps = isMobile() ? 0.02 : 0.008;   // coarser seek step on phones = fewer decodes
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
@@ -278,14 +306,16 @@ function mountScrollWorld(container, config) {
       // Never queue a seek while the decoder is still resolving the last one.
       // On phones a fast flick would otherwise pile up seeks and freeze the clip;
       // cur keeps lerping, so we snap to the latest target the moment it's free.
-      if (s.video.seeking) continue;
-      if (!s.visible && Math.abs(s.cur - s.target) < 0.002) continue;
+      if (!s.visible) continue;
+      if (s.video.seeking) { moving = true; continue; }
+      if (Math.abs(s.cur - s.target) > 0.002) moving = true;
+
       s.cur += (s.target - s.cur) * (reduce ? 1 : 0.18);
       const dur = s.video.duration || 1;
       const t = clamp(s.cur, 0, 0.999) * dur;
       if (Math.abs(s.video.currentTime - t) > eps) { try { s.video.currentTime = t; } catch (e) {} }
     }
-    requestAnimationFrame(raf);
+    if (moving) wake();
   }
 
   // iOS needs a user gesture before a muted video will decode/paint reliably. On the
@@ -307,7 +337,7 @@ function mountScrollWorld(container, config) {
   window.addEventListener('touchstart', onFirstGesture, { once: true, passive: true });
 
   // Particles are a per-frame cost we can't afford alongside video scrubbing on a phone.
-  seedParticles(particles, reduce || coarse);
+  seedParticles(particles, readingMode);
   window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
   // Mobile browsers fire `resize` every time the URL bar slides in/out. Re-running
   // layout() there rebuilds the track height and yanks the scroll position, so on
@@ -321,8 +351,16 @@ function mountScrollWorld(container, config) {
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', layout);
   window.addEventListener('load', layout);
+  container.addEventListener('click', event => {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link) return;
+    const id = link.getAttribute('href').slice(1);
+    const index = id === 'top' ? 0 : SECTIONS.findIndex(section => section.id === id);
+    if (index >= 0) { event.preventDefault(); jumpTo(index); }
+  });
+  document.addEventListener('visibilitychange', wake);
   layout();
-  requestAnimationFrame(raf);
+  wake();
 
   // ---- helpers ----
   function el(tag, cls) { const n = document.createElement(tag); if (cls) n.className = cls; return n; }
