@@ -28,3 +28,9 @@ a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-vi
 @media(max-width:600px){.sw-topbar{padding:calc(12px + env(safe-area-inset-top)) 18px 12px;gap:12px}.sw-brand__name{font-size:1rem}.sw-brand{gap:8px}.sw-topcta{padding:10px 16px}.sw-reading .sw-copy{padding-left:24px;padding-right:24px}.sw-copy__cta{align-items:stretch}.sw-copy__cta a{flex:1;text-align:center}.sw-copy__num{font-size:.68rem}}
 @media(max-height:500px) and (orientation:landscape){.sw-reading .sw-copy{min-height:650px}.sw-reading__image{object-position:center 45%}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Power Genie signature: solar orbit, energy bolt, and a cool-blue spark. */
+.sw-brand{flex-shrink:0;gap:10px;min-height:44px}
+.sw-brand__logo{display:block;width:40px;height:40px;flex:none}
+.sw-brand__name{font-size:1.25rem;font-weight:600;letter-spacing:-.055em;white-space:nowrap;color:#fff6e4}
+@media(max-width:600px){.sw-brand{gap:7px}.sw-brand__logo{width:32px;height:32px}.sw-brand__name{font-size:1rem}}

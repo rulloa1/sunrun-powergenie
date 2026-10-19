@@ -119,7 +119,13 @@ function mountScrollWorld(container, config) {
   const topbar = el('div', 'sw-topbar');
   if (config.brand) {
     const brand = el('a', 'sw-brand'); brand.href = (config.brand.href || '#');
-    brand.appendChild(el('span', 'sw-brand__mark'));
+    if (config.brand.logo) {
+      const mark = el('img', 'sw-brand__logo'); mark.src = config.brand.logo;
+      mark.alt = ''; mark.width = 40; mark.height = 40; brand.appendChild(mark);
+    } else {
+      brand.appendChild(el('span', 'sw-brand__mark'));
+    }
+    brand.setAttribute('aria-label', (config.brand.name || 'Home') + ' — home');
     const nm = el('span', 'sw-brand__name'); nm.textContent = config.brand.name || ''; brand.appendChild(nm);
     topbar.appendChild(brand);
   }
