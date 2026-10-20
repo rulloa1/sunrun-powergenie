@@ -95,12 +95,17 @@ a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-vi
     opacity:0;visibility:hidden;transform:translateY(12px);
     transition:opacity .25s ease,transform .25s ease,visibility .25s}
   .pg-quote-dock.is-shown{opacity:1;visibility:visible;transform:none}
-  /* Keep the scene copy clear of the dock. */
-  .sw-root:not(.sw-reading) .sw-copy{bottom:calc(84px + env(safe-area-inset-bottom))}
   /* Long words in a title shouldn't push past the screen edge. */
   .sw-copy__title{overflow-wrap:anywhere}
   /* One quote button at a time: the bar's CTA hands over to the dock. */
   .pg-dock-on .sw-topcta{display:none}
+}
+/* Keep the scene copy clear of the dock -- but only where the dock actually
+   appears. The height bound mirrors the suppression query below exactly, so a
+   short landscape phone keeps its own tuned bottom instead of losing 66px to
+   a dock that was never rendered. */
+@media(max-width:640px) and (min-height:521px){
+  .sw-root:not(.sw-reading) .sw-copy{bottom:calc(84px + env(safe-area-inset-bottom))}
 }
 /* Reading mode carries its own CTA under each scene, and a short landscape
    phone has no vertical room to give away. */
