@@ -68,6 +68,12 @@ a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-vi
 @media(max-width:1200px){.sw-nav{display:none}}
 @media(max-width:600px){.sw-topbar{gap:8px;padding-left:12px;padding-right:12px}.sw-family-link{font-size:.7rem}.sw-topcta{font-size:.72rem;padding:10px 12px}.sw-brand__name{font-size:.9rem}.sw-brand__logo{width:28px;height:28px}.sw-brand{gap:5px}}
 
-/* Official Sunrun wordmark, sized without stretching its aspect ratio. */
-.sw-brand__logo{width:121px;height:auto;object-fit:contain}.sw-brand__name{display:none}
-@media(max-width:600px){.sw-brand__logo{width:100px;height:auto}}
+/* The Power Genie lockup: the genie mark with the wordmark set in cream, so it
+   reads on the navy bar. Sized by height; width follows its 3.09:1 ratio.
+   The link carries the accessible name, so the text span stays hidden. */
+/* aspect-ratio overrides the engine's 40x40 width/height attributes, so the bar
+   reserves the right width before the image decodes and nothing shifts. */
+.sw-brand__logo{display:block;width:auto;height:46px;aspect-ratio:647/180;flex:none;object-fit:contain}
+.sw-brand__name{display:none}
+@media(max-width:860px){.sw-brand__logo{height:40px}}
+@media(max-width:600px){.sw-brand__logo{height:34px}}
