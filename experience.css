@@ -68,6 +68,34 @@ a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-vi
 @media(max-width:1200px){.sw-nav{display:none}}
 @media(max-width:600px){.sw-topbar{gap:8px;padding-left:12px;padding-right:12px}.sw-family-link{font-size:.7rem}.sw-topcta{font-size:.72rem;padding:10px 12px}.sw-brand__name{font-size:.9rem}.sw-brand__logo{width:28px;height:28px}.sw-brand{gap:5px}}
 
-/* Official Sunrun wordmark, sized without stretching its aspect ratio. */
-.sw-brand__logo{width:121px;height:auto;object-fit:contain}.sw-brand__name{display:none}
-@media(max-width:600px){.sw-brand__logo{width:100px;height:auto}}
+/* "The Power Genie" wordmark: a lit sun mark beside an elegant serif lockup.
+   The brand config passes no logo, so the engine renders .sw-brand__mark. */
+.sw-brand__logo{display:none}
+.sw-brand{gap:12px;align-items:center}
+.sw-brand__name{
+  display:block;white-space:nowrap;
+  font-family:'Cormorant Garamond',Georgia,ui-serif,serif;
+  font-size:clamp(1.3rem,1.9vw,1.62rem);
+  font-weight:500;letter-spacing:.015em;line-height:1;
+  color:#fff6e4;
+}
+/* Warm highlight across the letters, so the mark reads as lit rather than flat.
+   Guarded: without background-clip:text the solid cream above stands. */
+@supports ((-webkit-background-clip:text) or (background-clip:text)) {
+  .sw-brand__name{
+    padding-right:.07em;      /* keeps the clipped gradient off the last glyph */
+    background:linear-gradient(96deg,#fff9ef 0%,#ffeed2 54%,#f3d7a2 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+}
+.sw-brand__mark{
+  width:20px;height:20px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 36% 32%,#fff4da 0%,#ffd98f 44%,#efa84d 100%);
+  box-shadow:0 0 0 1px #ffd98f3d,0 0 18px #ffcf7559;
+}
+@media(max-width:600px){
+  .sw-brand{gap:9px}
+  .sw-brand__name{font-size:1.1rem}
+  .sw-brand__mark{width:17px;height:17px}
+}
