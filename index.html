@@ -28,6 +28,7 @@
       box-shadow: 0 -24px 48px rgba(10, 20, 40, .28);
       font-family: var(--sw-font-body);
     }
+    .quote-panel:focus { outline: none; }        /* focused programmatically; the scroll is the cue */
     .quote-panel__eyebrow {
       margin: 0 0 8px; font-size: .74rem; font-weight: 600; letter-spacing: .14em;
       text-transform: uppercase; color: #FF6B00;
@@ -80,7 +81,7 @@
 </head>
 <body>
   <main id="world"></main>
-  <section class="quote-panel" id="quote" aria-labelledby="quote-title">
+  <section class="quote-panel" id="quote" aria-labelledby="quote-title" tabindex="-1">
     <p class="quote-panel__eyebrow">Your free quote</p>
     <h2 id="quote-title">Let's power your home.</h2>
     <div class="quote-panel__grid">
@@ -263,7 +264,12 @@
       event.preventDefault();
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (window.allowQuoteScroll) window.allowQuoteScroll(4000);   // deliberate long scroll
-      document.getElementById('quote').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      const panel = document.getElementById('quote');
+      panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      // preventDefault() above skips the fragment navigation, so move focus in by hand:
+      // otherwise the next Tab stays in the film instead of entering the form.
+      panel.focus({ preventScroll: true });
+      if (location.hash !== '#quote') history.replaceState(null, '', '#quote');
     });
   </script>
   <script src="ecosystem.js"></script>
