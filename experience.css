@@ -94,6 +94,12 @@ a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-vi
   background:radial-gradient(circle at 36% 32%,#fff4da 0%,#ffd98f 44%,#efa84d 100%);
   box-shadow:0 0 0 1px #ffd98f3d,0 0 18px #ffcf7559;
 }
+/* Forced colors (Windows High Contrast) drops background images, which would
+   leave transparent-filled glyphs and an unpainted sun. Restore both. */
+@media (forced-colors: active) {
+  .sw-brand__name{background:none;-webkit-text-fill-color:currentColor;color:CanvasText}
+  .sw-brand__mark{background:none;border:1px solid CanvasText;box-shadow:none}
+}
 @media(max-width:600px){
   .sw-brand{gap:9px}
   .sw-brand__name{font-size:1.1rem}
