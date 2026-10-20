@@ -80,6 +80,14 @@ function mountScrollWorld(container, config) {
   const DIVE_W = config.diveScroll || 1.3;
   const CONN_W = config.connScroll || 0.9;
   const CROSSFADE = (config.crossfade != null) ? config.crossfade : 0.12;  // seam dissolve width (vh)
+  // Idle intro: before the visitor scrolls, the opening clip plays a slow
+  // back-and-forth loop over its first `idleRange` (0..1) so the hero is moving
+  // on arrival. `idlePeriod` = seconds for one full forward+back cycle.
+  const IDLE = config.idle !== false && !reduce;
+  const IDLE_RANGE = config.idleRange != null ? config.idleRange : 0.35;
+  const IDLE_PERIOD = config.idlePeriod || 8;
+  const idleStart = performance.now();
+  let idleActive = IDLE;
   const N = SECTIONS.length;
   if (!N) return;
 
@@ -368,11 +376,20 @@ function mountScrollWorld(container, config) {
       // cur keeps lerping, so we snap to the latest target the moment it's free.
       if (!s.visible) continue;
       if (s.video.seeking || s.video.readyState < 1) continue;
+      if (i === 0 && idleActive) {
+        if ((window.scrollY || 0) > 2) idleActive = false;
+        else {
+          const ph = ((performance.now() - idleStart) / 1000 / IDLE_PERIOD) % 1;
+          s.target = IDLE_RANGE * (0.5 - 0.5 * Math.cos(ph * 2 * Math.PI));
+          moving = true;
+        }
+      }
       if (Math.abs(s.cur - s.target) > 0.002) moving = true;
 
       // Touch flings must seek to the latest position, not decode a queue of
       // intermediate frames while the finger has already moved to another scene.
-      s.cur += (s.target - s.cur) * (isMobile() ? 1 : 0.18);
+      const handoff = i === 0 && IDLE && Math.abs(s.target - s.cur) > 0.03;
+      s.cur += (s.target - s.cur) * (isMobile() && !handoff ? 1 : (idleActive && i === 0 ? 1 : 0.18));
       const dur = s.video.duration || 1;
       const t = clamp(s.cur, 0, 0.999) * dur;
       if (Math.abs(s.video.currentTime - t) > eps) { try { s.video.currentTime = t; } catch (e) {} }
