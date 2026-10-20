@@ -1,7 +1,7 @@
 {
   "project": "sunrun-scroll",
-  "status": "visual_mobile_refresh_pending_browser_QA",
-  "timestamp": "2026-10-18",
+  "status": "all_house_scenes_updated_pending_real_browser_QA",
+  "timestamp": "2026-10-19",
   "config": {
     "subject": "Sunrun / PowerGenie solar",
     "artDirection": "Photorealistic render",
@@ -34,14 +34,24 @@
     "assets/stills/06-cta-m.png"
   ],
   "mobileDives": {
-    "status": "pending"
+    "status": "done (768x432, desktop framing, -g 4)"
   },
   "mobileConnectors": {
-    "status": "pending"
+    "status": "done (768x432, desktop framing, -g 4)"
   },
   "nextSteps": [
     "Browser QA on desktop, iOS Safari and Android Chrome before merging",
     "Optional future native portrait video mode"
   ],
-  "mobileExperience": "Single continuous scroll-scrubbed video journey, matching desktop with smaller responsive copy and controls. Reading mode reserved for reduced-motion or Save-Data preferences."
+  "mobileExperience": "Single continuous scroll-scrubbed video journey, matching desktop with smaller responsive copy and controls. Reading mode reserved for reduced-motion or Save-Data preferences.",
+  "changes_2026_10_19": [
+    "Sun dive re-rendered: Earth turns to North America and descends onto Houston, TX (was Africa)",
+    "Roof scene re-rendered around a luxury contemporary estate (new 02-roof still, dive, posters)",
+    "Connectors c01 (Houston -> estate) and c02 (roof -> garage battery) re-rendered from actual boundary frames",
+    "All 11 mobile clips rebuilt from desktop masters - 8 were truncated/corrupt",
+    "Rendered via OpenArt: wan3-0 image2video 720p, stills gpt-image-2 image2image",
+    "Desktop clips re-encoded all-intra to match the chain (GOP 8 made the opening scrub choppy)",
+    "Home scene rebuilt in the estate: family in a luxury living room (ocean sunset on the TV), pull-out to the estate at blue hour",
+    "Finale rebuilt on the estate at sunset; connectors c03/c04/c05 re-rendered from actual boundary frames"
+  ]
 }
