@@ -10,13 +10,15 @@
     else source = sessionStorage.getItem('powergenie-source');
   } catch (_) { /* Navigation remains usable when browser storage is unavailable. */ }
   if (allowed.has(source)) {
-    document.querySelectorAll('a[href]').forEach(link => {
-      const url = new URL(link.href, location.href);
+    // Covers both outbound links and the embedded quote form (iframe src).
+    document.querySelectorAll('a[href], iframe[data-src]').forEach(node => {
+      const attr = node.tagName === 'IFRAME' ? 'data-src' : 'href';
+      const url = new URL(node.getAttribute(attr), location.href);
       if (url.hostname === 'sunrun.my.salesforce-sites.com' && url.searchParams.get('srep') === '/powergenie') {
         url.searchParams.set('utm_source', source);
         url.searchParams.set('utm_medium', 'brand_site');
         url.searchParams.set('utm_campaign', 'power_genie');
-        link.href = url.href;
+        node.setAttribute(attr, url.href);
       }
     });
   }

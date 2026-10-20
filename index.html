@@ -18,11 +18,94 @@
       --sw-font-display: 'Inter', ui-rounded, system-ui, sans-serif;
       --sw-font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
+    /* Quote panel: scrolls up over the fixed film like a curtain once the last scene ends. */
+    .quote-panel {
+      position: relative; z-index: 45;            /* above stage, copy, route rail; below top bar */
+      min-height: 100vh; min-height: 100dvh;
+      padding: calc(clamp(84px, 10vw, 112px) + env(safe-area-inset-top)) clamp(16px, 5vw, 64px)
+               calc(40px + env(safe-area-inset-bottom));
+      background: #F6F7FB; color: #1A1A2E;
+      box-shadow: 0 -24px 48px rgba(10, 20, 40, .28);
+      font-family: var(--sw-font-body);
+    }
+    .quote-panel__eyebrow {
+      margin: 0 0 8px; font-size: .74rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: #FF6B00;
+    }
+    .quote-panel h2 {
+      margin: 0 0 28px; color: #1A1A2E; font-family: var(--sw-font-display); font-weight: 700;
+      font-size: clamp(1.7rem, 3.6vw, 2.6rem); letter-spacing: -.02em; line-height: 1.1;
+    }
+    .quote-panel__grid {
+      display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: clamp(20px, 3vw, 40px);
+      align-items: start; max-width: 1280px;
+    }
+    .rep-card {
+      background: #0B2233; color: #F7FBFF; border-radius: 18px; padding: 26px 24px;
+      box-shadow: 0 12px 32px rgba(10, 20, 40, .18);
+    }
+    .rep-card__name { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; }
+    .rep-card__role { margin: 4px 0 18px; font-size: .9rem; color: #A9C1D6; }
+    .rep-card__contact { display: grid; gap: 8px; margin: 0 0 20px; padding: 0; list-style: none; }
+    .rep-card__contact a {
+      display: inline-flex; align-items: center; gap: 10px; color: #FFFFFF; font-weight: 600;
+      font-size: .95rem; text-decoration: none; word-break: break-all;
+    }
+    .rep-card__contact a:hover, .rep-card__contact a:focus-visible { text-decoration: underline; }
+    .rep-card__contact svg { flex: none; width: 18px; height: 18px; color: #FF8A2B; }
+    .rep-card__intro { margin: 0 0 14px; font-size: .95rem; line-height: 1.55; color: #D9E6F2; }
+    .rep-card__why { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .rep-card__why li {
+      position: relative; padding-left: 26px; font-size: .92rem; line-height: 1.45; color: #F7FBFF;
+    }
+    .rep-card__why li::before {
+      content: ""; position: absolute; left: 0; top: .32em; width: 14px; height: 14px; border-radius: 50%;
+      background: #FF6B00; box-shadow: inset 0 0 0 4px #0B2233;
+    }
+    .quote-panel__formwrap {
+      background: #FFFFFF; border-radius: 18px; overflow: hidden;
+      box-shadow: 0 12px 32px rgba(10, 20, 40, .12);
+    }
+    .quote-panel__frame { display: block; width: 100%; height: min(900px, 82vh); height: min(900px, 82dvh); border: 0; background: #FFFFFF; }
+    .quote-panel__alt {
+      margin: 0; padding: 12px 18px; font-size: .86rem; color: #4A5568;
+      border-top: 1px solid rgba(26, 26, 46, .08);
+    }
+    .quote-panel__alt a { color: #0066CC; font-weight: 600; }
+    @media (max-width: 860px) {
+      .quote-panel__grid { grid-template-columns: 1fr; }
+    }
   </style>
   <link rel="stylesheet" href="experience.css">
 </head>
 <body>
   <main id="world"></main>
+  <section class="quote-panel" id="quote" aria-labelledby="quote-title">
+    <p class="quote-panel__eyebrow">Your free quote</p>
+    <h2 id="quote-title">Let's power your home.</h2>
+    <div class="quote-panel__grid">
+      <aside class="rep-card" aria-label="Your Sunrun solar expert">
+        <p class="rep-card__name">Horace Lawrence</p>
+        <p class="rep-card__role">The Block Sales Expert Team Lead · Sunrun</p>
+        <ul class="rep-card__contact">
+          <li><a href="mailto:horace.lawrence@sunrun.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>horace.lawrence@sunrun.com</a></li>
+          <li><a href="tel:+15102417007"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>510-241-7007</a></li>
+        </ul>
+        <p class="rep-card__intro">Hi, I'm Horace! I'm dedicated to making the process of going solar as easy as possible. Why solar?</p>
+        <ul class="rep-card__why">
+          <li>Lock in a rate to avoid rising utility costs.</li>
+          <li>A more reliable source of energy for your home.</li>
+          <li>With a battery, protection during blackouts.</li>
+        </ul>
+      </aside>
+      <div class="quote-panel__formwrap">
+        <iframe class="quote-panel__frame" title="Sunrun quote request form"
+          data-src="https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie#form-group"
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <p class="quote-panel__alt">Form not loading? <a href="https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+      </div>
+    </div>
+  </section>
   <noscript><p>Explore solar and battery options for your home. <a href="https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie">Get your Power Genie quote</a>.</p></noscript>
 
   <script src="scrub-engine.js"></script>
@@ -35,7 +118,7 @@
       hint: 'scroll to explore',
       nav: true,
       atmosphere: true,
-      cta: { label: 'Get a Quote', href: 'https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie' },
+      cta: { label: 'Get a Quote', href: '#quote' },
 
       sections: [
         {
@@ -48,9 +131,9 @@
           accent: '#FF6B00',
           eyebrow: 'Where It Begins',
           title: 'A brighter way to power home.',
-          body: 'Every second, the sun releases more energy than humanity has used in all of history. Power Genie brings that power to your roof.',
+          body: 'Every second, the sun releases more energy than humanity has used in all of history. Power Genie brings that power home to Houston.',
           tags: ['Solar Energy', 'Battery Storage'],
-          cta: { primary: { label: 'Explore Your Solar Options', href: 'https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie' } }
+          cta: { primary: { label: 'Explore Your Solar Options', href: '#quote' } }
         },
         {
           id: 'roof',
@@ -61,8 +144,8 @@
           clipMobile: 'assets/vid/mobile/02-roof-dive.mp4',
           accent: '#0066CC',
           eyebrow: 'Capture The Light',
-          title: 'Solar Panels',
-          body: 'Sleek, modern panels transform sunlight into electricity. Professionally installed, backed by a 25-year warranty.',
+          title: 'Solar, Beautifully Done',
+          body: 'Sleek all-black panels that look as good as they perform. Professionally installed, backed by a 25-year warranty.',
           tags: ['Premium Panels', 'Expert Install', '25-Year Warranty']
         },
         {
@@ -75,7 +158,7 @@
           accent: '#4CAF50',
           eyebrow: 'Store & Protect',
           title: 'Battery Backup',
-          body: 'Store excess energy for outages or peak hours. Keep your lights on when the grid goes dark.',
+          body: 'Store excess energy for peak hours, storm season and grid emergencies. Keep your lights — and your AC — on when the grid goes dark.',
           tags: ['Backup Power', 'Peak Savings', 'Grid Independence']
         },
         {
@@ -88,7 +171,7 @@
           accent: '#FFF8F0',
           eyebrow: 'Power Everything',
           title: 'Your Home, Powered',
-          body: 'Run your AC, charge your EV, live comfortably — all on clean energy you generate.',
+          body: 'Run the AC through a Houston summer, charge your EV, and live comfortably — all on clean energy you generate.',
           tags: ['Lower Bills', 'EV Ready', 'Smart Home']
         },
         {
@@ -101,7 +184,7 @@
           accent: '#4CAF50',
           eyebrow: 'Join The Movement',
           title: 'Your Neighborhood',
-          body: 'Join thousands of families going solar. Build a cleaner, more resilient community together.',
+          body: 'Join Houston families going solar. Build a cleaner, more resilient community together.',
           tags: ['Local Impact', 'Growing Network', 'Cleaner Future']
         },
         {
@@ -114,9 +197,9 @@
           accent: '#FF6B00',
           eyebrow: 'Your Turn',
           title: 'Go Solar Today',
-          body: 'See how much you can save. Get a free, customized quote in minutes.',
+          body: 'See how much your Houston home can save. Get a free, customized quote in minutes.',
           cta: {
-            primary: { label: 'Get Your Free Quote', href: 'https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie' },
+            primary: { label: 'Get Your Free Quote', href: '#quote' },
             secondary: { label: 'Learn More', href: '#sun' }
           }
         }
@@ -137,6 +220,50 @@
         'assets/vid/encoded/c04-home-community.mp4',
         'assets/vid/encoded/c05-community-cta.mp4'
       ]
+    });
+  </script>
+  <script>
+    // Load Sunrun's page opened at its form (#form-group). Browsers may scroll the
+    // parent page to that anchor when the frame loads, which would yank visitors
+    // through the film, so any jump that wasn't caused by the visitor is undone.
+    (() => {
+      const frame = document.querySelector('.quote-panel__frame');
+      if (!frame) return;
+      let guardUntil = 0, lastY = scrollY, userUntil = 0;
+      const allow = ms => { userUntil = Math.max(userUntil, performance.now() + ms); };
+      // Wheel/touch scroll right away; clicks and keys can start long smooth scrolls.
+      ['wheel', 'touchstart', 'touchmove'].forEach(ev => addEventListener(ev, () => allow(400), { passive: true }));
+      ['keydown', 'pointerdown'].forEach(ev => addEventListener(ev, () => allow(2500), { passive: true }));
+      window.allowQuoteScroll = allow;
+      addEventListener('scroll', () => {
+        const now = performance.now(), dy = Math.abs(scrollY - lastY);
+        // Smooth scrolls (nav, "Get a Quote") move in small steps; the anchor jump is one big leap.
+        if (now < guardUntil && now > userUntil && dy > 300) { scrollTo(0, lastY); return; }
+        lastY = scrollY;
+      }, { passive: true });
+      const load = () => {
+        if (frame.src) return;
+        lastY = scrollY; guardUntil = performance.now() + 15000;
+        frame.addEventListener('load', () => { guardUntil = performance.now() + 1500; }, { once: true });
+        frame.src = frame.dataset.src;
+      };
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+          if (entries.some(e => e.isIntersecting)) { io.disconnect(); load(); }
+        }, { rootMargin: '1200px 0px' });
+        io.observe(frame);
+      } else load();
+    })();
+  </script>
+  <script>
+    // "Get a Quote" buttons glide down to the embedded quote form.
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href="#quote"]');
+      if (!link) return;
+      event.preventDefault();
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (window.allowQuoteScroll) window.allowQuoteScroll(4000);   // deliberate long scroll
+      document.getElementById('quote').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
     });
   </script>
   <script src="ecosystem.js"></script>
