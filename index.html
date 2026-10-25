@@ -18,6 +18,10 @@
       --sw-font-display: 'Inter', ui-rounded, system-ui, sans-serif;
       --sw-font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
+    .pg-skip-journey { position: fixed; top: 8px; left: 8px; z-index: 1000;
+      padding: 12px 18px; background: #fff; color: #0066CC; border-radius: 8px;
+      transform: translateY(-160%); font: 600 1rem var(--sw-font-body); }
+    .pg-skip-journey:focus { transform: none; }
     /* Quote panel: scrolls up over the fixed film like a curtain once the last scene ends. */
     .quote-panel {
       position: relative; z-index: 45;            /* above stage, copy, route rail; below top bar */
@@ -80,6 +84,7 @@
   <link rel="stylesheet" href="experience.css">
 </head>
 <body>
+  <a class="pg-skip-journey" href="#quote">Skip to your solar quote</a>
   <main id="world"></main>
   <!-- Phone-only: puts the quote CTA in thumb reach. Hidden until the scroll
        hint has faded, and again once the quote panel itself is on screen. -->
@@ -113,119 +118,7 @@
   <noscript><p>Explore solar and battery options for your home. <a href="https://sunrun.my.salesforce-sites.com/purl/?srep=/powergenie">Get your quote from The Power Genie</a>.</p></noscript>
 
   <script src="scrub-engine.js"></script>
-  <script>
-    mountScrollWorld(document.getElementById('world'), {
-      brand: { name: 'The Power Genie', href: '#top', logo: 'assets/brand/power-genie-lockup.webp' },
-      mobileClipsUseDesktopFraming: true,
-      diveScroll: 1.1,
-      connScroll: 0.45,
-      hint: 'scroll to explore',
-      nav: true,
-      atmosphere: true,
-      cta: { label: 'Get a Quote', href: '#quote' },
-
-      sections: [
-        {
-          id: 'sun',
-          label: 'The Source',
-          still: 'assets/stills/01-sun.webp',
-          stillMobile: 'assets/stills/01-sun-m.webp',
-          clip: 'assets/vid/encoded/01-sun-dive.mp4',
-          clipMobile: 'assets/vid/mobile/01-sun-dive.mp4',
-          accent: '#FF6B00',
-          eyebrow: 'Where It Begins',
-          title: 'A brighter way to power home.',
-          body: 'Every second, the sun releases more energy than humanity has used in all of history. The Power Genie brings that power home to Houston.',
-          tags: ['Solar Energy', 'Battery Storage'],
-          cta: { primary: { label: 'Explore Your Solar Options', href: '#quote' } }
-        },
-        {
-          id: 'roof',
-          label: 'Your Roof',
-          still: 'assets/stills/02-roof.webp',
-          stillMobile: 'assets/stills/02-roof-m.webp',
-          clip: 'assets/vid/encoded/02-roof-dive.mp4',
-          clipMobile: 'assets/vid/mobile/02-roof-dive.mp4',
-          accent: '#0066CC',
-          eyebrow: 'Capture The Light',
-          title: 'Solar, Beautifully Done',
-          body: 'Sleek all-black panels that look as good as they perform. Professionally installed, backed by a 25-year warranty.',
-          tags: ['Premium Panels', 'Expert Install', '25-Year Warranty']
-        },
-        {
-          id: 'battery',
-          label: 'Storage',
-          still: 'assets/stills/03-battery.webp',
-          stillMobile: 'assets/stills/03-battery-m.webp',
-          clip: 'assets/vid/encoded/03-battery-dive.mp4',
-          clipMobile: 'assets/vid/mobile/03-battery-dive.mp4',
-          accent: '#4CAF50',
-          eyebrow: 'Store & Protect',
-          title: 'Battery Backup',
-          body: 'Store excess energy for peak hours, storm season and grid emergencies. Keep your lights — and your AC — on when the grid goes dark.',
-          tags: ['Backup Power', 'Peak Savings', 'Grid Independence']
-        },
-        {
-          id: 'home',
-          label: 'Home',
-          still: 'assets/stills/04-home.webp',
-          stillMobile: 'assets/stills/04-home-m.webp',
-          clip: 'assets/vid/encoded/04-home-dive.mp4',
-          clipMobile: 'assets/vid/mobile/04-home-dive.mp4',
-          accent: '#FFF8F0',
-          eyebrow: 'Power Everything',
-          title: 'Your Home, Powered',
-          body: 'Run the AC through a Houston summer, charge your EV, and live comfortably — all on clean energy you generate.',
-          tags: ['Lower Bills', 'EV Ready', 'Smart Home']
-        },
-        {
-          id: 'community',
-          label: 'Community',
-          still: 'assets/stills/05-community.webp',
-          stillMobile: 'assets/stills/05-community-m.webp',
-          clip: 'assets/vid/encoded/05-community-dive.mp4',
-          clipMobile: 'assets/vid/mobile/05-community-dive.mp4',
-          accent: '#4CAF50',
-          eyebrow: 'Join The Movement',
-          title: 'Your Neighborhood',
-          body: 'Join Houston families going solar. Build a cleaner, more resilient community together.',
-          tags: ['Local Impact', 'Growing Network', 'Cleaner Future']
-        },
-        {
-          id: 'cta',
-          label: 'Get Started',
-          still: 'assets/stills/06-cta.webp',
-          stillMobile: 'assets/stills/06-cta-m.webp',
-          clip: 'assets/vid/encoded/06-cta-dive.mp4',
-          clipMobile: 'assets/vid/mobile/06-cta-dive.mp4',
-          accent: '#FF6B00',
-          eyebrow: 'Your Turn',
-          title: 'Go Solar Today',
-          body: 'See how much your Houston home can save. Get a free, customized quote in minutes.',
-          cta: {
-            primary: { label: 'Get Your Free Quote', href: '#quote' },
-            secondary: { label: 'Learn More', href: '#sun' }
-          }
-        }
-      ],
-
-      connectorsMobile: [
-        'assets/vid/mobile/c01-sun-roof.mp4',
-        'assets/vid/mobile/c02-roof-battery.mp4',
-        'assets/vid/mobile/c03-battery-home.mp4',
-        'assets/vid/mobile/c04-home-community.mp4',
-        'assets/vid/mobile/c05-community-cta.mp4'
-      ],
-
-      connectors: [
-        'assets/vid/encoded/c01-sun-roof.mp4',
-        'assets/vid/encoded/c02-roof-battery.mp4',
-        'assets/vid/encoded/c03-battery-home.mp4',
-        'assets/vid/encoded/c04-home-community.mp4',
-        'assets/vid/encoded/c05-community-cta.mp4'
-      ]
-    });
-  </script>
+  <script src="power-genie-world.js"></script>
   <script>
     // Load Sunrun's page opened at its form (#form-group). Browsers may scroll the
     // parent page to that anchor when the frame loads, which would yank visitors
