@@ -77,3 +77,38 @@ a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-vi
 .sw-brand__name{display:none}
 @media(max-width:860px){.sw-brand__logo{height:40px}}
 @media(max-width:600px){.sw-brand__logo{height:34px}}
+
+/* Phone-only quote dock, in thumb reach.
+   The engine fades its scroll hint out over the first half viewport, so this
+   fades in as that goes; it steps aside again once the quote panel arrives.
+   Hidden by default so it never shows up as a stray link outside the query. */
+.pg-quote-dock{display:none}
+@media(max-width:640px){
+  .pg-quote-dock{
+    display:flex;align-items:center;justify-content:center;
+    position:fixed;z-index:48;
+    left:16px;right:16px;bottom:max(12px,env(safe-area-inset-bottom));
+    min-height:52px;padding:14px 20px;border-radius:30px;
+    background:#d4f1ff;color:#082638;
+    font-family:var(--sw-font-body);font-size:.92rem;font-weight:700;
+    text-decoration:none;box-shadow:0 10px 30px #040e1673;
+    opacity:0;visibility:hidden;transform:translateY(12px);
+    transition:opacity .25s ease,transform .25s ease,visibility .25s}
+  .pg-quote-dock.is-shown{opacity:1;visibility:visible;transform:none}
+  /* Long words in a title shouldn't push past the screen edge. */
+  .sw-copy__title{overflow-wrap:anywhere}
+  /* One quote button at a time: the bar's CTA hands over to the dock. */
+  .pg-dock-on .sw-topcta{display:none}
+}
+/* Keep the scene copy clear of the dock -- but only where the dock actually
+   appears. The height bound mirrors the suppression query below exactly, so a
+   short landscape phone keeps its own tuned bottom instead of losing 66px to
+   a dock that was never rendered. */
+@media(max-width:640px) and (min-height:521px){
+  .sw-root:not(.sw-reading) .sw-copy{bottom:calc(84px + env(safe-area-inset-bottom))}
+}
+/* Reading mode carries its own CTA under each scene, and a short landscape
+   phone has no vertical room to give away. */
+#world.sw-reading ~ .pg-quote-dock{display:none}
+@media(max-width:640px) and (max-height:520px){.pg-quote-dock{display:none}}
+@media(prefers-reduced-motion:reduce){.pg-quote-dock{transition:none}}

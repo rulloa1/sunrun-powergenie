@@ -81,6 +81,9 @@
 </head>
 <body>
   <main id="world"></main>
+  <!-- Phone-only: puts the quote CTA in thumb reach. Hidden until the scroll
+       hint has faded, and again once the quote panel itself is on screen. -->
+  <a class="pg-quote-dock" href="#quote">Get a Quote</a>
   <section class="quote-panel" id="quote" aria-labelledby="quote-title" tabindex="-1">
     <p class="quote-panel__eyebrow">Your free quote</p>
     <h2 id="quote-title">Let's power your home.</h2>
@@ -271,6 +274,34 @@
       panel.focus({ preventScroll: true });
       if (location.hash !== '#quote') history.replaceState(null, '', '#quote');
     });
+
+    // Show the phone dock once the engine's scroll hint has faded (it fades
+    // across the first half viewport), and hide it again when the quote panel
+    // is on screen, where a floating button would only cover the form.
+    (() => {
+      const dock = document.querySelector('.pg-quote-dock');
+      if (!dock) return;
+      const panel = document.getElementById('quote');
+      let panelOnScreen = false;
+      const update = () => {
+        // display tells us whether the media queries allow the dock at all
+        // (phone width, tall enough, not reading mode), so the bar's CTA is
+        // only hidden when the dock really can take over from it.
+        const usable = getComputedStyle(dock).display !== 'none';
+        const on = usable && window.scrollY > innerHeight * 0.5 && !panelOnScreen;
+        dock.classList.toggle('is-shown', on);
+        document.documentElement.classList.toggle('pg-dock-on', on);
+      };
+      addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update, { passive: true });
+      if (panel && 'IntersectionObserver' in window) {
+        new IntersectionObserver(([entry]) => {
+          panelOnScreen = entry.isIntersecting;
+          update();
+        }, { rootMargin: '0px 0px -25% 0px' }).observe(panel);
+      }
+      update();
+    })();
   </script>
   <script src="ecosystem.js"></script>
 </body>
