@@ -231,7 +231,9 @@ function mountScrollWorld(container, config) {
   ['wheel', 'touchstart', 'keydown'].forEach(ev =>
     window.addEventListener(ev, () => { if (jumpTarget >= 0) releaseJump(); }, { passive: true }));
 
-  function jumpTo(i) {
+  function jumpTo(i, updateHash = true) {
+    // replaceState avoids adding an entry for every journey navigation click.
+    if (updateHash && SECTIONS[i].id) history.replaceState(null, '', '#' + SECTIONS[i].id);
     if (readingMode) { copies[i].scrollIntoView({ behavior: reduce ? 'instant' : 'smooth' }); return; }
     // The viewport may have changed since the last layout (e.g. a desktop window
     // resized while hidden); recompute so we land on the right scene.
@@ -439,6 +441,15 @@ function mountScrollWorld(container, config) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) read(); });
   window.addEventListener('pageshow', read);
   layout();
+  // The scene articles are fixed overlays, so native fragment scrolling cannot
+  // locate their timeline positions. Leave external sections such as #quote alone.
+  function followSceneHash() {
+    const id = location.hash.slice(1);
+    const index = id === 'top' ? 0 : SECTIONS.findIndex(section => section.id === id);
+    if (index >= 0) jumpTo(index, false);
+  }
+  window.addEventListener('hashchange', followSceneHash);
+  followSceneHash();
   wake();
 
   // ---- helpers ----
