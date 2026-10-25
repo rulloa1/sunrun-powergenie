@@ -231,10 +231,21 @@ function mountScrollWorld(container, config) {
   ['wheel', 'touchstart', 'keydown'].forEach(ev =>
     window.addEventListener(ev, () => { if (jumpTarget >= 0) releaseJump(); }, { passive: true }));
 
-  function jumpTo(i, updateHash = true) {
+  const blobCache = new Map(); // bounded cache: max 2 active blob URLs
+  function freeOldBlobs() {
+    while (blobCache.size > 2) {
+      const oldest = blobCache.keys().next().value;
+      const u = blobCache.get(oldest);
+      blobCache.delete(oldest);
+      try { URL.revokeObjectURL(u); } catch (_) {}
+    }
+  }
+
+  function jumpTo(i, updateHash = true, smoothScroll = true) {
     // replaceState avoids adding an entry for every journey navigation click.
     if (updateHash && SECTIONS[i].id) history.replaceState(null, '', '#' + SECTIONS[i].id);
-    if (readingMode) { copies[i].scrollIntoView({ behavior: reduce ? 'instant' : 'smooth' }); return; }
+    const useSmooth = smoothScroll && !reduce;
+    if (readingMode) { copies[i].scrollIntoView({ behavior: useSmooth ? 'smooth' : 'auto' }); return; }
     // The viewport may have changed since the last layout (e.g. a desktop window
     // resized while hidden); recompute so we land on the right scene.
     if (!coarse && (window.innerHeight !== vh || window.innerWidth !== laidOutW)) layout();
@@ -243,8 +254,8 @@ function mountScrollWorld(container, config) {
     // Start fetching the destination clip now rather than when we fly past it.
     loadClip(seg);
     setActive(i);
-    if (!reduce) { jumpTarget = i; clearTimeout(jumpTimer); jumpTimer = setTimeout(releaseJump, 1600); }
-    window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+    if (useSmooth) { jumpTarget = i; clearTimeout(jumpTimer); jumpTimer = setTimeout(releaseJump, 1600); }
+    window.scrollTo({ top, behavior: useSmooth ? 'smooth' : 'auto' });
   }
 
   function setActive(k) {
@@ -279,6 +290,17 @@ function mountScrollWorld(container, config) {
     };
     v.addEventListener('loadedmetadata', () => {
       s.ready = Number.isFinite(v.duration) && v.duration > 0;
+      // Seekable verification: if seekable is clamped to 0 on non-range hosts, fetch bounded blob
+      if (s.ready && v.seekable && v.seekable.length === 0 && !s.blobFallback) {
+        s.blobFallback = true;
+        fetch(url).then(r => r.blob()).then(blob => {
+          if (!s.hasClip || !s.video) return;
+          const blobUrl = URL.createObjectURL(blob);
+          blobCache.set(s, blobUrl);
+          freeOldBlobs();
+          v.src = blobUrl;
+        }).catch(() => {});
+      }
       read();
     });
     v.addEventListener('seeked', () => { reveal(); wake(); });
@@ -443,13 +465,13 @@ function mountScrollWorld(container, config) {
   layout();
   // The scene articles are fixed overlays, so native fragment scrolling cannot
   // locate their timeline positions. Leave external sections such as #quote alone.
-  function followSceneHash() {
+  function followSceneHash(smooth = false) {
     const id = location.hash.slice(1);
     const index = id === 'top' ? 0 : SECTIONS.findIndex(section => section.id === id);
-    if (index >= 0) jumpTo(index, false);
+    if (index >= 0) jumpTo(index, false, smooth);
   }
-  window.addEventListener('hashchange', followSceneHash);
-  followSceneHash();
+  window.addEventListener('hashchange', () => followSceneHash(true));
+  followSceneHash(false);
   wake();
 
   // ---- helpers ----

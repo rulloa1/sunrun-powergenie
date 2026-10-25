@@ -13,13 +13,17 @@
     // Covers both outbound links and the embedded quote form (iframe src).
     document.querySelectorAll('a[href], iframe[data-src]').forEach(node => {
       const attr = node.tagName === 'IFRAME' ? 'data-src' : 'href';
-      const url = new URL(node.getAttribute(attr), location.href);
-      if (url.hostname === 'sunrun.my.salesforce-sites.com' && url.searchParams.get('srep') === '/powergenie') {
-        url.searchParams.set('utm_source', source);
-        url.searchParams.set('utm_medium', 'brand_site');
-        url.searchParams.set('utm_campaign', 'power_genie');
-        node.setAttribute(attr, url.href);
-      }
+      const raw = node.getAttribute(attr);
+      if (!raw || raw.startsWith('#') || raw.startsWith('tel:') || raw.startsWith('mailto:')) return;
+      try {
+        const url = new URL(raw, location.href);
+        if (url.hostname === 'sunrun.my.salesforce-sites.com' && url.searchParams.get('srep') === '/powergenie') {
+          url.searchParams.set('utm_source', source);
+          url.searchParams.set('utm_medium', 'brand_site');
+          url.searchParams.set('utm_campaign', 'power_genie');
+          node.setAttribute(attr, url.href);
+        }
+      } catch (_) {}
     });
   }
   const bar = document.querySelector('.sw-topbar');
