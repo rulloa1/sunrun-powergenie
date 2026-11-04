@@ -4,8 +4,11 @@ mountScrollWorld(document.getElementById('world'), {
   brand: { name: 'THE POWER GENIE', href: '#top', logo: 'assets/brand/power-genie-lockup.webp' },
   mobileClipsUseDesktopFraming: true,
   idle: false, // Scroll alone controls the camera; no opening rewind loop.
+  // Pacing follows on-screen motion (assets/vid/motion-profile.js): connScroll is the
+  // average connector length, scroll/diveScroll the minimum length of a scene.
+  motion: window.SW_MOTION_PROFILE,
   diveScroll: 1.3,
-  connScroll: 0.45,
+  connScroll: 0.85,
   hint: 'scroll to explore',
   nav: true,
   atmosphere: true,
